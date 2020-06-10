@@ -1,0 +1,265 @@
+\documentclass [a4paper] {article}
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\usepackage[utf8]{inputenc}
+\usepackage{minibox}
+
+\usepackage{hyperref}
+
+\title
+{Elementos de programación en R-Cran}
+
+\author{OJEDA,YESICA R. - Facultad de Ingeniería \\
+<yesimza@gmail.com> \\ 
+
+\\Universidad Nacional de Cuyo}
+
+
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\maketitle
+\section*{Elementos básicos de programación}
+
+\begin{itemize}
+  \item Conocer y profundizar la comprensión de las funciones básicas del software RStudio.
+
+  \item Utilizar algoritmos bien conocidos.
+  \item Comparar las soluciones obtenidas utilizando algoritmos conocidos con las soluciones que brinda RStudio el cual posee sus propios algoritmos.
+  \item Comparar el costo computacional, medido como tiempo de ejecución. Esto permitirá entender la calidad del algoritmo que se implementa.
+\end{itemize}
+
+\section*{Consignas del Trabajo}
+
+\begin{itemize}
+  \item Revisar los algoritmos que se presentan en el apartado de actividades. Primero se deberá ejecutarlos en la l�nea de comando de la consola y luego hacer scripts de cada uno
+  \item Generar un vector secuencia y tomar el tiempo para resolverlo.
+  \item Implementación de una serie Fibonacci.
+  \item Ordenar un vector por mótodo burbuja y sort, comparación de uso de recursos y rapidez de ambos comandos.
+  \item Progresión geom�trica del COVid-19 y generación de mapa
+  \item Utilización de base de datos propia y base de datos externa actualizable.
+  \item Compilar todo y presentarlo en un infome formato pdf construido con RStudio, archivo rswave y Latex
+\end{itemize}
+\section*{Herramientas para medir el tiempo de ejecución}
+  La actividad propuesta requiere de medir el correspondiente tiempo de ejecución de los algoritmos ejecutados. Para llevar a cabo esta tarea R-Studio cuenta con al menos tres paquetes R que permiten comparar la perfomance de los códigos en cuesti�n (rbenchmark, microbenchmark y tictoc). Estos adem�s de medir el tiempo nos indican porcentaje de memoria y microprocesador
+utilizados.
+
+  Además, el lenguaje R proporciona al menos dos mótodos para medir el tiempo de ejecución del código R (Sys.time y system.time), que es una aproximación bastante ótil para un curso como el que desarrollamos.
+  Todos los comandos anteriormente mencionados pueden ser consultados en R-Studio colocando en la consola " ?nombre del comando " por ejemplo ?tictoc.
+
+  Antes de comenzar se recomienda hacer una limpieza del entorno con los comandos 
+<<T1,echo=TRUE>>=
+rm(list = ls())
+@
+
+  Ahora se ejecuta primero el comando tic-toc, donde " tic " es como dar la largada en un cronometro y "toc" cuando se finaliza.
+  
+\subsection{Usando tic-toc}
+<<T1,echo=TRUE>>=
+library(tictoc)
+A<-20
+tic("sleeping")
+print("dormir siesta")
+Sys.sleep(2)
+print("....suena el despertador")
+toc()
+@
+
+\subsection{Usando sleeping}
+<<T1,echo=TRUE>>=
+#C�digo para sys.sleep Verificad
+sleep_for_a_minute <- function() { Sys.sleep(14) }
+start_time <- Sys.time()
+sleep_for_a_minute()
+end_time <- Sys.time()
+end_time - start_time
+'Resultado que me dio es...'
+print(end_time- start_time)
+@
+
+  Este comando tiene como desventaja que Si se usa dentro de un documento en R-Studio se demoraró mucho tiempo cuando se compile un PDF o una presentación.
+  
+\section*{Generar un vector secuencia y medir el tiempo}
+<<T1,echo=TRUE>>=
+start_time <- Sys.time()
+for (i in 1:50000) { A[i] <- (i*2)}
+head(A)
+tail(A)
+end_time <- Sys.time()
+end_time - start_time
+
+start_time <- Sys.time()
+B <- seq(1,1000000, 2)
+head (B)
+tail (B)
+end_time <- Sys.time()
+end_time - start_time
+print(end_time- start_time)
+@
+
+\section*{Ordenar de un vector por meótodo burbuja y comparación con Sort usando benchmark}
+<<T1,echo=TRUE>>=
+x<-sample(1:20000,10)
+#plot(x)
+burbuja <- function(x){
+  n<-length(x)
+  for(j in 1:(n-1)){
+    for(i in 1:(n-j)){
+      if(x[i]>x[i+1]){
+        temp<-x[i]
+        x[i]<-x[i+1]
+        x[i+1]<-temp
+      }
+    }
+  }
+  return(x)
+}
+
+#Muestra obtenida
+resBurbuja<-burbuja(x)
+
+#Muestra Ordenada
+x<-sample(1:20000,10)
+sort(x)
+respSort<-sort(x)
+@
+
+  Ahora se busca comparar el uso de recursos entre burbuja y sort
+ 
+<<T1,echo=TRUE>>=
+library(printr)
+library(ggrepel)
+library(ggplot2)
+library(microbenchmark)
+mbm1<-microbenchmark(
+  resBurbuja,respSort)
+mbm1
+
+#Mostrar resultado de mbm
+autoplot(mbm1)
+@
+  Se debe se�alar que el resultado varía todas las veces que se realiza, ya que depende de si hay otras ventanas abiertas y de la capacidad del procesador y la memoria que se posea la máquina.
+
+ Si se compara sort respecto de burbuja, se obtiene:
+<<T1,echo=TRUE>>=
+mbm2<-microbenchmark(
+  respSort,
+  resBurbuja)
+print(mbm2)
+
+#Mostrar resultado de mbm
+autoplot(mbm2)
+@
+
+\section*{Progresión geomótrica, Fibonacci}
+
+  Primero se calcula Fibonacci
+<<T1,echo=TRUE>>=
+for(i in 0:500000)
+{ a<-i
+b <-i+1
+c <- a+b
+# comentar esta l�nea para conocer el n�umero m�s grande hallado
+#print(c)
+}
+print(c)
+@
+
+  Luego, usando una base de datos en formato csv sobre el COVID-19 al 9 de marzo de 2020, que est�n est�ticas en la computadora.
+
+  Para modelar el problema se usa una progresión geomótrica
+<<T1,echo=TRUE>>=
+library(readr)
+casos_A <- read_delim("C:/Users/YES/Desktop/TP COVID/BD COVID/casos.csv", 
+                      ";", escape_double = FALSE, trim_ws = TRUE, 
+                      skip = 1)
+#view(casos_A)
+summary(casos_A)
+m <- length(casos_A$Casos)
+F <- (casos_A$Casos[2:m])/(casos_A$Casos[1:m-1])
+mean(F,na.rm = TRUE)
+sd(F,na.rm = TRUE)
+var(F,na.rm = TRUE)
+@
+
+\section*{Uso de base externa y generación de mapa con localización de casos}
+  Se utilizá en el caso anterior y en este datos proporicionados por el hospital J. Hopkings de USA, los cuales son actualizados y de libre uso en el repositorio Github
+
+  
+<<T1,echo=TRUE>>=
+
+#Generación de mapa con infectados
+library(readr)
+datacovid_Jun7_global <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+#View(datacovid_Jun7_global)
+#Para saber en cu�ntas regiones se subidividen los pa�ses
+#paises <- summary(factor(datacovid_Jun7_global$`Country/Region`))
+#head(paises)
+
+#Calculo para el 25 de marzo
+'La cantidad de infectados al 25 de marzo de 2020 es..'
+datacovid_Jun7_global[datacovid_Jun7_global$`Country/Region`=="Argentina",68]
+@
+
+<<Fig3,echo=TRUE,fig=TRUE>>=
+library(maps)
+library(ggrepel)
+library(ggplot2)
+library(rlang)
+library(tidyverse)
+library(viridis)
+library(dplyr)
+library(maps)
+library(ggrepel)
+planisferio <- map_data("world")
+total_infec <-length(datacovid_Jun7_global)
+datas_map <- datacovid_Jun7_global[ , c(1,2,3,4,total_infec)]
+
+## get the COVID-19 data
+
+# cutoffs based on the number of cases
+mybreaks <- c(1, 200, 1000, 10000, 500000)
+
+total_infec <-length(datacovid_Jun7_global)
+datas_map <- datacovid_Jun7_global[ , c(1,2,3,4,total_infec)]
+ggplot() +
+  geom_polygon(data = planisferio, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
+  geom_point(data=datacovid_Jun7_global, aes(x=Long, y=Lat, size=`4/17/20`, color=`4/17/20`), alpha=0.7) +
+  scale_size_continuous(name="Cases", trans="log", range=c(1,7),breaks=mybreaks, labels = c("1-999", "1000-9999", "10,000-99,999", "100,000-999,999", "1,000,000+")) +
+  
+  scale_color_viridis_c(option="inferno",name="Cases", trans="log",breaks=mybreaks, labels = c("1-999", "1000-9999", "10,000-99,999", "100,000-999,999", "1,000,000+")) +
+  theme_void() + 
+  guides( colour = guide_legend()) +
+  labs(caption = "Basado en datos oficiales Johns Hopkins CSSE. Visualization UNCuyo-Argentina ") +
+  theme(
+    legend.position = "bottom",
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#ffffff", color = NA), 
+    panel.background = element_rect(fill = "#ffffff", color = NA), 
+    legend.background = element_rect(fill = "#ffffff", color = NA)
+  )
+@
+
+\section*{Conclusión}
+  Realizar este praáctico me permitió introducirme y  profundizar el conocimiento en la utilización de RStudio y comprender más del lenguaje de programación R y pudiendo dar distintos modos de visibilidad a los resultados.
+
+  Además, puede ser un buen punto de inicio si se quiere trabajar en áreas relacionadas a Data analist, Data Scientist, entre otras.
+
+  Entre los conocimientos que adquirí se pueden nombrar:
+
+\begin{itemize}
+  \item Generar un vector secuencia.
+  \item Implementación de una serie Fibonacci.
+  \item Orden de un vector por m�todo burbuja y sort.
+  \item Creación de un mapograma
+  \item Uso de secciones y recuadros
+  \item Uso de Rsweave para generar PDFs
+  \item Instalar Bibliotecas
+  \item Trabajar con archivos .csv y Datasets
+\end{itemize}
+  Lamentablemente, no logr� incorporar los gráficos en el texto principal. Si se generaron en un documento aparte y los pude visualizar en R-Studio-
+\end{document}
+
+\end{document}
+
+\end{document}
